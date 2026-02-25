@@ -1,0 +1,31 @@
+From: LB2004 <lb2004@example.com>
+Subject: [PATCH] clk: rockchip: rk3568: allow GMAC1 RGMII speed clock to reparent for 1000M
+
+GMAC1 RGMII speed mux has CLK_SET_RATE_NO_REPARENT flag set, so when
+stmmac driver requests 125MHz clock for 1000M operation, the clock
+framework cannot switch the mux to the 125MHz source (gmac1_clkin).
+
+This patch changes CLK_SET_RATE_NO_REPARENT to CLK_SET_RATE_PARENT,
+allowing the clock to reparent and enabling 1000BASE-T to work on
+RK3566/RK3568 boards with RGMII PHYs like MAE0621A.
+
+Tested on LB2004 (RK3566) with MAE0621A PHY.
+
+ drivers/clk/rockchip/clk-rk3568.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/clk/rockchip/clk-rk3568.c b/drivers/clk/rockchip/clk-rk3568.c
+index 000000000..111111111 100644
+--- a/drivers/clk/rockchip/clk-rk3568.c
++++ b/drivers/clk/rockchip/clk-rk3568.c
+@@ -760,7 +760,7 @@ static struct rockchip_clk_branch rk3568_clk_branches[] __initdata = {
+ 			RK3568_CLKGATE_CON(12), 4, GFLAGS),
+ 	MUX(SCLK_GMAC0_RGMII_SPEED, "clk_gmac0_rgmii_speed", mux_gmac0_rgmii_speed_p, CLK_SET_RATE_NO_REPARENT,
+ 			RK3568_CLKSEL_CON(85), 8, 2, MFLAGS),
+-	COMPOSITE_NODIV(SCLK_GMAC1_RGMII_SPEED, "clk_gmac1_rgmii_speed", mux_gmac1_rgmii_speed_p, CLK_SET_RATE_NO_REPARENT,
++	COMPOSITE_NODIV(SCLK_GMAC1_RGMII_SPEED, "clk_gmac1_rgmii_speed", mux_gmac1_rgmii_speed_p, CLK_SET_RATE_PARENT,
+ 			RK3568_CLKSEL_CON(86), 8, 2, MFLAGS,
+ 			RK3568_CLKGATE_CON(12), 5, GFLAGS),
+ 	MUX(SCLK_GMAC1_RX_TX, "clk_gmac1_rx_tx", mux_gmac1_rx_tx_p, 0,
+-- 
+2.43.0
